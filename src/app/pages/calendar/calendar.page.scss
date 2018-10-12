@@ -1,0 +1,41 @@
+.lot-request{
+  background-color: paleturquoise;
+}
+.lot-no-response{
+  background-color: lightcoral;
+  color: azure;
+}
+.lot-parking{
+  background-color: lightgreen;
+  color: darkgreen;
+}
+.lot-sharing{
+  background-color: #51a7e8;
+  color: midnightblue;
+}
+.lot-free{
+  background-color: lightgrey;
+}
+.calendar{
+  margin-top: 0px;
+  margin-bottom: 10px;
+  padding: 0px 0px 0px 0px;
+  height: 40vh;
+}
+.calendar p{
+  align-items: center;
+  font-weight: bold;
+  color: darkgray;
+}
+.calendar-cell{
+  color: dimgray;
+}
+.calendar-cell-outside-period{
+  background-color: lightgray;
+}
+.calendar-cell-not-current-month {
+  opacity: 0.5;
+}
+.calendar-cell-today{
+  box-shadow: inset 0px 0px 0px 2px red;
+}

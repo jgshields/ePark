@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title text-center>Sign Up</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <form [formGroup]="signupForm" (submit)="signup()">
+    <ion-item>
+      <ion-label floating>Email</ion-label>
+      <ion-input type="email" formControlName="email"
+                 [class.invalid]="!signupForm.controls['email'].valid && signupForm.controls['email'].touched"></ion-input>
+    </ion-item>
+    <ion-label class="error-message" *ngIf="!signupForm.controls['email'].valid && signupForm.controls['email'].touched">
+      You need to enter a valid password
+    </ion-label>
+    <ion-item>
+      <ion-label floating>Password</ion-label>
+      <ion-input type="password" formControlName="password"
+                 [class.invalid]="!signupForm.controls['password'].valid && signupForm.controls['password'].touched"></ion-input>
+    </ion-item>
+    <ion-label class="error-message" *ngIf="!signupForm.controls['password'].valid && signupForm.controls['password'].touched">
+      You need to enter a valid password
+    </ion-label>
+
+    <ion-item>
+      <ion-label floating>Confirm Password</ion-label>
+      <ion-input type="password" formControlName="confirmPassword"></ion-input>
+    </ion-item>
+    <ion-label class="error-message" *ngIf="!signupForm.controls['confirmPassword'].valid && signupForm.controls['confirmPassword'].touched">
+      You need to match your password
+    </ion-label>
+
+    <ion-button color="primary" expand="block" type="submit">Signup</ion-button>
+  </form>
+</ion-content>

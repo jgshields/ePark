@@ -10,3 +10,33 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
+.parking{
+  background-color: lightgreen;
+}
+.free{
+  background-color: lightslategrey;
+}
+.card{
+  font-weight: bolder;
+  font-size: larger;
+}
+
+.toast{
+  text-align: center;
+  font-weight: bold;
+}
+.toast-info {
+  >div {
+    background-color: lightblue !important;
+  }
+}
+.toast-success {
+  >div {
+    background-color: lightgreen !important;
+  }
+}
+.toast-error {
+  >div {
+    background-color: lightpink !important;
+  }
+}

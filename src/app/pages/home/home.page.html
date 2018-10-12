@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title text-center>
+      Lot Manager
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-card tappable (click)="parking()" class="parking parking-card">
+    <ion-card-header text-center>Parking</ion-card-header>
+    <ion-card-content text-center>
+      <ion-icon slot="icon-only" name="car"></ion-icon>
+    </ion-card-content>
+  </ion-card>
+  <ion-card tappable  (click)="freeSpace()" class="free parking-card">
+    <ion-card-header text-center>Free Space</ion-card-header>
+    <ion-card-content text-center>
+      <ion-icon name="pause"></ion-icon>
+    </ion-card-content>
+  </ion-card>
+  <ion-footer *ngIf="usr">
+    <ion-grid>
+      <ion-row>
+        <ion-col text-center [size]="3">
+          <ion-chip>
+            <ion-icon name="person"></ion-icon>
+            <ion-label>{{usr.fullName}}</ion-label>
+          </ion-chip>
+        </ion-col>
+        <ion-col text-center [size]="3">
+          <ion-chip>
+            <ion-icon name="pause"></ion-icon>
+            <ion-label>{{usr.commuteDetails.companyName}} - {{usr.commuteDetails.parkingSpot}}</ion-label>
+          </ion-chip>
+        </ion-col>
+        <ion-col text-center [size]="3">
+          <ion-chip>
+            <ion-icon name="calendar"></ion-icon>
+            <ion-label>{{today}}</ion-label>
+          </ion-chip>
+        </ion-col>
+        <ion-col text-center [size]="3">
+          <ion-chip *ngIf="todaysUsage">
+            <ion-icon name="car"></ion-icon>
+            <ion-label>{{todaysUsage.usage}}</ion-label>
+          </ion-chip>
+          <ion-chip *ngIf="!todaysUsage">
+            <ion-icon name="car"></ion-icon>
+            <ion-label>No Response</ion-label>
+          </ion-chip>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-footer>
+</ion-content>

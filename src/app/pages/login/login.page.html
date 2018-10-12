@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title text-center>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <form [formGroup]="loginForm" (submit)="loginUser()">
+    <ion-item>
+      <ion-label floating>Email</ion-label>
+      <ion-input type="email" formControlName="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label floating>Password</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+    <ion-button color="primary" expand="block" type="submit">Login</ion-button>
+  </form>
+  <ion-button expand="block" fill="clear" routerLink="/signup">Create a New Account</ion-button>
+  <ion-button expand="block" fill="clear" routerLink="/reset-password">I forgot my password ;(</ion-button>
+</ion-content>
