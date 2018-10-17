@@ -6,12 +6,15 @@ import {Constants} from './Constants';
 export class Calendar {
   public today: Moment;
   public currMonth: Moment;
+  // 2d array of days for a given calendar month
   public weeks: Date[][] = [[]];
+  // array of minimised weekday names
   public weekdays: string[] = [];
 
   constructor () {
     this.today = moment();
     this.currMonth = moment().startOf('month');
+
     // shift the weekdays array so that monday is the first day
     this.weekdays = moment.weekdaysMin();
     const sun: string = this.weekdays[0];
@@ -19,6 +22,25 @@ export class Calendar {
     this.weekdays.push(sun);
 
     this.setupCalendar();
+  }
+
+  public static calculateNumDays(month: string, weekdaysOnly: boolean): number {
+    // returns the number of days in a month of format 'YYYYMM'
+    // if weekdaysOnly is true it will return the number of weekdays in the month
+    console.log(month);
+    let numDays = moment(month, 'YYYYMM').daysInMonth();
+    if (weekdaysOnly) {
+      // take away 2 days per weekend from the total number of days
+      numDays -=  Math.floor(numDays / 7) * 2;
+      // if the first day of the month is a sunday or the last day is a saturday we need to take that into account too
+      if (moment(month, 'YYYYMM').startOf('month').isoWeekday() === Constants.ISOWEEK.SUNDAY) {
+        numDays --;
+      }
+      if (moment(month, 'YYYYMM').endOf('month').isoWeekday() === Constants.ISOWEEK.SATURDAY) {
+        numDays --;
+      }
+    }
+    return numDays;
   }
 
   public static isWeekend(dateToCheck: any): boolean {

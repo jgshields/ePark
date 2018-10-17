@@ -47,17 +47,9 @@ export class Usages {
   }
 
   public getUsageForDate(dateToCheck: Date): Usage {
-    let day = _.find(this.usages, (usage) => {
-      return moment(usage.usageDate).isSame(moment(dateToCheck));
+    const day = _.find(this.usages, (usage) => {
+      return moment(usage.usageDate).isSame(moment(dateToCheck), 'day');
     });
-    if (!day) {
-      day = new Usage();
-      day.source({
-        usageDate: moment().format('YYYYMMDD'),
-        usage: Constants.USAGE.FREE,
-        responseTime: moment().format('YYYYMMDD HH:mm:ss')
-      });
-    }
     return day;
   }
 }

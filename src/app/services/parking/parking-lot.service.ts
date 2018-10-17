@@ -5,8 +5,8 @@ import {Company} from '../../model/Company';
 import { AngularFireList } from '@angular/fire/database';
 import * as moment from 'moment';
 import {Constants} from '../../model/Constants';
-import USAGE = Constants.USAGE;
 import {Person} from '../../model/Person';
+import {Calendar} from '../../model/Calendar';
 
 @Injectable({
   providedIn: 'root'
@@ -39,70 +39,125 @@ export class ParkingLotService {
     return this.afDb.list(path);
   }
 
+  getParkingStats(path: string): AngularFireList<any> {
+    return this.afDb.list(path);
+  }
+  private incrementStatistic(path: string) {
+    this.afDb.object(path).query.ref.transaction((num) => {
+      if (num === null) {
+        return num = 1;
+      } else {
+        return num + 1;
+      }
+    });
+  }
+
+  private decrementStatistic(path: string) {
+    this.afDb.object(path).query.ref.transaction((num) => {
+      if (num === null) {
+        return num = 0;
+      } else {
+        return num - 1;
+      }
+    });
+  }
+
   private updateParkingStats(currUsage: Usage, usage: Usage): void {
-
     const datesToUpdate: any[] = [];
-    datesToUpdate.push(moment().format('YYYYMMDD'));
-    datesToUpdate.push(moment().format('YYYYMM'));
-    datesToUpdate.push(moment().format('YYYY'));
 
-    // loop thru the dates call the transaction
+    datesToUpdate.push(moment(usage.usageDate).format('YYYYMMDD'));
+    datesToUpdate.push(moment(usage.usageDate).format('YYYYMM'));
+    datesToUpdate.push(moment(usage.usageDate).format('YYYY'));
+
+    // update the users stats for the month in question.
+    if (!currUsage) {
+      // first time in. no usage exists.
+      if (usage.usage === Constants.USAGE.FREE) {
+        this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.FREE}`);
+        // if it's a weekday update the weekdays stats
+        if (Calendar.isWeekend(usage.usageDate)) {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.FREE}`);
+        } else {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.FREE}`);
+        }
+      } else {
+        this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.FREE}`);
+        // if it's a weekday update the weekdays stats
+        if (Calendar.isWeekend(usage.usageDate)) {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.FREE}`);
+        } else {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.FREE}`);
+        }
+      }
+    } else {
+      // if we are parking and a record has already been written for that user on that day...
+      if (usage.usage === Constants.USAGE.PARKING && currUsage.usage === Constants.USAGE.FREE) {
+        this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.FREE}`);
+        this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.PARKING}`);
+        if (Calendar.isWeekend(usage.usageDate)) {
+          this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.FREE}`);
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.PARKING}`);
+        } else {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.PARKING}`);
+          this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.FREE}`);
+        }
+      }
+      // if we are not parking and a record has already been written for that user on that day...
+      if (usage.usage === Constants.USAGE.FREE && currUsage.usage === Constants.USAGE.PARKING) {
+        this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.FREE}`);
+        this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/${Constants.USAGE.PARKING}`);
+        if (Calendar.isWeekend(usage.usageDate)) {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.FREE}`);
+          this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekends/${Constants.USAGE.PARKING}`);
+        } else {
+          this.incrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.FREE}`);
+          this.decrementStatistic(`stats/users/${usage.user}/${moment().format('YYYYMM')}/weekdays/${Constants.USAGE.PARKING}`);
+        }
+      }
+    }
+    // loop thru the dates call the transaction to update the company stats
     for (let i = 0; i < 3; i++) {
       if (!currUsage) {
         // first time in. no usage exists.
         if (usage.usage === Constants.USAGE.FREE) {
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`).query.ref.transaction((free) => {
-            if (usage === null) {
-              return free = 1;
-            } else {
-              return free + 1;
-            }
-          });
+          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
+          if (Calendar.isWeekend(usage.usageDate)) {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
+          } else {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
+          }
         } else {
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`).query.ref.transaction((parking) => {
-            if (usage === null) {
-              return parking = 1;
-            } else {
-              return parking + 1;
-            }
-          });
+          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
+          if (Calendar.isWeekend(usage.usageDate)) {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
+          } else {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
+          }
         }
       } else {
         // if we are parking and a record has already been written for that user on that day...
         if (usage.usage === Constants.USAGE.PARKING && currUsage.usage === Constants.USAGE.FREE) {
-          // the user is reversing their decision so the old stats need to be decremented
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${USAGE.FREE}`).query.ref.transaction((free) => {
-            if (free === null) {
-              return free = 0;
-            } else {
-              return free - 1;
-            }
-          });
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${USAGE.PARKING}`).query.ref.transaction((parking) => {
-            if (parking === null) {
-              return parking = 1;
-            } else {
-              return parking + 1;
-            }
-          });
+          this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
+          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
+          if (Calendar.isWeekend(usage.usageDate)) {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
+            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
+          } else {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
+            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
+          }
         }
         // if we are not parking and a record has already been written for that user on that day...
         if (usage.usage === Constants.USAGE.FREE && currUsage.usage === Constants.USAGE.PARKING) {
-          // the user is reversing their decision so the old stats need to be decremented
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${USAGE.FREE}`).query.ref.transaction((free) => {
-            if (free === null) {
-              return free = 1;
-            } else {
-              return free + 1;
-            }
-          });
-          this.afDb.object(`stats/${usage.company}/${datesToUpdate[i]}/${USAGE.PARKING}`).query.ref.transaction((parking) => {
-            if (parking === null) {
-              return parking = 0;
-            } else {
-              return parking - 1;
-            }
-          });
+          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
+          this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
+          if (Calendar.isWeekend(usage.usageDate)) {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
+            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
+          } else {
+            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
+            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
+          }
         }
       }
     }

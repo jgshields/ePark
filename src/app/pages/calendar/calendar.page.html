@@ -8,33 +8,40 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-slides pager="true">
-    <ion-slide>
-      <ion-grid id="calendar">
-        <ion-row no-margin no-padding>
-          <ion-col col-md-1 col-1 offset-1 offset-md-3>
-            <ion-icon name="arrow-dropleft" (click)="previousMonth()" class="next-prev"></ion-icon>
-          </ion-col>
-          <ion-label col-md-4 col-6>{{calendar.currMonth.format('MMM')}} {{calendar.currMonth.format('YYYY')}}</ion-label>
-          <ion-col col-md-1 col-1>
-            <ion-icon name="arrow-dropright" (click)="nextMonth()" class="next-prev"></ion-icon>
-          </ion-col>
-        </ion-row>
-        <ion-row>
-          <ion-col *ngFor="let day of calendar.weekdays" class="day-name">
-            {{day}}
-          </ion-col>
-        </ion-row>
-        <ion-row *ngFor="let week of calendar.weeks">
-          <ion-col *ngFor="let day of week" [ngClass]="setCalendarClass(day)" (click)="manageSpace(day)">
-            {{day.getDate()}}
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-slide>
-    <ion-slide>
-    </ion-slide>
-    <ion-slide>
-    </ion-slide>
-  </ion-slides>
+  <ion-segment [(ngModel)]="stat">
+    <ion-segment-button value="calendar">Calendar
+    </ion-segment-button>
+    <ion-segment-button value="weekdays" (click)="showWeekdayData()">Weekdays
+    </ion-segment-button>
+    <ion-segment-button value="allDays">All Days
+    </ion-segment-button>
+  </ion-segment>
+  <div *ngIf="stat === 'calendar'">
+    <ion-grid id="calendar">
+      <ion-row no-margin no-padding>
+        <ion-col col-1 offset-1 offset-md-3>
+          <ion-icon name="arrow-dropleft" (click)="previousMonth()" class="next-prev"></ion-icon>
+        </ion-col>
+        <ion-label col-10>{{calendar.currMonth.format('MMM')}} {{calendar.currMonth.format('YYYY')}}</ion-label>
+        <ion-col col-1>
+          <ion-icon name="arrow-dropright" (click)="nextMonth()" class="next-prev"></ion-icon>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col *ngFor="let day of calendar.weekdays" class="day-name">
+          {{day}}
+        </ion-col>
+      </ion-row>
+      <ion-row *ngFor="let week of calendar.weeks">
+        <ion-col *ngFor="let day of week" [ngClass]="setCalendarClass(day)" (click)="manageSpace(day)">
+          {{day.getDate()}}
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div *ngIf="stat === 'weekdays'">
+    <canvas #doughnutCanvas></canvas>
+  </div>
+
 </ion-content>

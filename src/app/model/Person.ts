@@ -10,6 +10,7 @@ export class Person implements IDBConnector {
   public uid: string;
   public fullName: string;
   public createdDatetime: string;
+  public tenureStartDate: string;
   public commuteDetails: CommuteDetails;
   public joinDatetime: string;
   public userType: string;
@@ -49,6 +50,9 @@ export class Person implements IDBConnector {
     if (this.commuteDetails) {
       res.commuteDetails = this.commuteDetails.sink();
     }
+    if (this.tenureStartDate) {
+      res.tenureStartDate = this.tenureStartDate;
+    }
     res.isAdmin = this.userType;
     return res;
   }
@@ -62,6 +66,7 @@ export class Person implements IDBConnector {
       this.createdDatetime = moment(data.createDatetime).format( 'YYYYMMDD HH:mm:ss');
       this.joinDatetime = data.joinDatetime;
       this.commuteDetails = data.commuteDetails;
+      this.tenureStartDate = data.tenureStartDate;
       this.uid = data.uid;
       this.userType = data.userType;
     }

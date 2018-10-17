@@ -1,6 +1,4 @@
 import IDBConnector = db.IDBConnector;
-import {Constants} from './Constants';
-import * as moment from 'moment';
 
 export class Usage implements IDBConnector {
   public user: string;
