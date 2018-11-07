@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import {CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router} from '@angular/router';
 import { Observable } from 'rxjs';
 import * as firebase from 'firebase';
@@ -7,7 +7,7 @@ import * as firebase from 'firebase';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router) {
+  constructor(private router: Router, private zone: NgZone) {
   }
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
@@ -17,9 +17,11 @@ export class AuthGuard implements CanActivate {
           // user is logged in
           resolve(true);
         } else {
-          // user is not logged in
-          this.router.navigate(['login']);
-          resolve(false);
+          this.zone.run(async () => {
+            // user is not logged in
+            this.router.navigate(['login']);
+            resolve(false);
+          });
         }
       });
     });

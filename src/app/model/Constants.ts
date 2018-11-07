@@ -40,4 +40,10 @@ export namespace Constants {
     public static readonly USER = 'USER';
   }
 
+  export class STATTYPE {
+    public static readonly CALENDAR = 'CALENDAR';
+    public static readonly WEEKDAY = 'WEEKDAY';
+    public static readonly ALL = 'ALL';
+    public static readonly WEEKEND = 'WEEKEND';
+  }
 }

@@ -1,15 +1,17 @@
 import IDBConnector = db.IDBConnector;
+import {ParkingSpot} from './ParkingSpot';
 
 export class Company implements IDBConnector {
   public name: string;
   public id: string;
+  public parkingSpots: ParkingSpot[];
 
-  constructor(_name: string) {
-    this.name = _name;
+  constructor() {
+    this.parkingSpots = [];
   }
 
   getPath(): string {
-    return `/companies/${this.id}`;
+    return `/company/${this.id}`;
   }
 
   sink(): any {
@@ -20,7 +22,7 @@ export class Company implements IDBConnector {
   }
 
   source(data: any): void {
-    this.name = data.name;
-    this.id = data.id;
+    this.id = data.key;
+    this.name = data.payload.val();
   }
 }

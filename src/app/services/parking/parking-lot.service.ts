@@ -3,10 +3,12 @@ import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import {Usage} from '../../model/Usage';
 import {Company} from '../../model/Company';
 import { AngularFireList } from '@angular/fire/database';
-import * as moment from 'moment';
 import {Constants} from '../../model/Constants';
 import {Person} from '../../model/Person';
 import {Calendar} from '../../model/Calendar';
+import * as moment from 'moment';
+import * as _ from 'lodash';
+import {async} from 'rxjs/internal/scheduler/async';
 
 @Injectable({
   providedIn: 'root'
@@ -27,11 +29,11 @@ export class ParkingLotService {
   }
 
   addCompany(company: Company): void {
-    this.afDb.list('companies').push(company.name);
+    this.afDb.list('company').push(company.name);
   }
 
   getCompanies(): AngularFireList<any> {
-    return this.afDb.list('companies');
+    return this.afDb.list('company');
   }
 
   getUsages(usr: Person): AngularFireList<any> {
@@ -42,6 +44,26 @@ export class ParkingLotService {
   getParkingStats(path: string): AngularFireList<any> {
     return this.afDb.list(path);
   }
+
+  runStatsJob(): Promise<any> {
+    return new Promise<any>(resolve => {
+      const path = '/compani';
+      this.afDb.list(path).snapshotChanges().subscribe((snap) => {
+        _.forEach(snap, (item) => {
+          console.log(item.key);
+        });
+        resolve(true);
+      });
+    });
+  }
+  private runUserStatsJob(): void {
+    const path = '';
+  }
+
+  private runCompanyStatsjob(): void {
+    const path = '';
+  }
+
   private incrementStatistic(path: string) {
     this.afDb.object(path).query.ref.transaction((num) => {
       if (num === null) {

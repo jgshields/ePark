@@ -27,6 +27,16 @@
         </ion-grid>
       </ion-label>
     </ion-item>
+    <ion-item>
+      <ion-label>
+        <ion-grid>
+          <ion-row>
+            <ion-col class="text-left" [size]="5">First Use</ion-col>
+            <ion-col class="text-left" [size]="7">{{person?.getCreatedDateTime('ddd DD MMM, YYYY')}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-label>
+    </ion-item>
     <ion-item (click)="updateEmail()">
       <ion-label>
         <ion-grid>
@@ -51,7 +61,7 @@
   </ion-list>
   <ion-list>
     <ion-list-header text-center>Commute Information</ion-list-header>
-    <ion-item (click)="updateCommuteDetails()">
+    <ion-item>
       <ion-label>
         <ion-grid>
           <ion-row>
@@ -60,10 +70,9 @@
             <ion-col class="text-left" size="4">Parking Spot</ion-col>
           </ion-row>
           <ion-row>
-            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.vehicle">{{person?.commuteDetails.vehicle}}</ion-col>
-            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName">{{person?.commuteDetails.companyName}}</ion-col>
-            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.parkingSpot">{{person?.commuteDetails.parkingSpot}}</ion-col>
-            <ion-col text-center class="placeholder-profile" size="12" *ngIf="!person?.commuteDetails.vehicle">Tap here to Edit</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.vehicle" (click)="updateVehicle()">{{person?.commuteDetails.vehicle}}</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName" (click)="updateCompany()">{{person?.commuteDetails.companyName}} ({{person.getTenure()}})</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.parkingSpot" (click)="updateParkingSpot()">{{person?.commuteDetails.parkingSpot}}</ion-col>
           </ion-row>
         </ion-grid>
       </ion-label>

@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import {AlertController} from '@ionic/angular';
 import {ProfileService} from '../../services/user/profile.service';
-import {Router} from '@angular/router';
 import {AuthService} from '../../services/user/auth.service';
 import {Person} from '../../model/Person';
+import {ParkingLotService} from '../../services/parking/parking-lot.service';
+import {Company} from '../../model/Company';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-profile',
@@ -12,16 +14,25 @@ import {Person} from '../../model/Person';
 })
 export class ProfilePage implements OnInit {
   public person: Person;
+  public companies: Company[];
 
   constructor(private alertCtrl: AlertController,
               private authService: AuthService,
               private profileService: ProfileService,
-              private router: Router) { }
+              private parkingService: ParkingLotService) { }
 
   ngOnInit() {
     this.profileService.getUserProfile().valueChanges().subscribe( (snap) => {
       this.person = new Person();
       this.person.source(snap);
+    });
+    this.companies = [];
+    this.parkingService.getCompanies().snapshotChanges().subscribe((snap) => {
+      _.forEach(snap, (item) => {
+        const company: Company = new Company();
+        company.source(item);
+        this.companies.push(company);
+      });
     });
   }
 
@@ -103,25 +114,53 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-  async updateCommuteDetails(): Promise<void> {
+
+
+  async updateCompany(): Promise<void> {
+    const radios: any [] = [];
+    let i;
+    let company: Company;
+    for (i = 0; i < this.companies.length; i++) {
+      company = this.companies[i];
+      if (company.name === this.person.commuteDetails.companyName) {
+        radios.push({
+          type: 'radio',
+          label: company.name,
+          value: company.name,
+          checked: true
+        });
+      } else {
+        radios.push({
+          type: 'radio',
+          label: company.name,
+          value: company.name,
+          checked: false
+        });
+      }
+    }
+
+    const alert = await this.alertCtrl.create(
+    {
+      subHeader: 'Update Company',
+      inputs: radios,
+      buttons: [
+        {text: 'Cancel'},
+        {text: 'Save',
+          handler: data => {
+            this.profileService.updateCompany(data);
+          }}
+      ]
+    });
+    await alert.present();
+  }
+
+  async updateParkingSpot(): Promise<void> {
     const alert = await this.alertCtrl.create({
-      subHeader: 'Commute Details',
+      subHeader: 'Update Parking Spot',
       inputs: [
         {
           type: 'text',
-          name: 'vehicle',
-          label: 'Vehicle Registration',
-          value: this.person.commuteDetails.vehicle
-        },
-        {
-          type: 'text',
-          name: 'companyName',
-          value: this.person.commuteDetails.companyName
-        },
-        {
-          type: 'text',
           name: 'parkingSpot',
-          label: 'Parking Spot',
           value: this.person.commuteDetails.parkingSpot
         }
       ],
@@ -129,12 +168,30 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateCommuteDeatils(data.vehicle, data.companyName, data.parkingSpot);
+            this.profileService.updateParkingSpot(data.parkingSpot);
           }}
       ]
     });
     await alert.present();
   }
 
-
+  async updateVehicle(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      subHeader: 'Update Vehicle Details',
+      inputs: [
+        {
+          type: 'text',
+          name: 'vehicle',
+          value: this.person.commuteDetails.vehicle
+        }],
+      buttons: [
+        {text: 'Cancel'},
+        {text: 'Save',
+          handler: data => {
+            this.profileService.updateVehicleDetails(data.vehicle);
+          }}
+      ]
+    });
+    await alert.present();
+  }
 }

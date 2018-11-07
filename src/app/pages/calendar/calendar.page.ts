@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { Chart } from 'chart.js';
+import {ToastController} from '@ionic/angular';
 import {ParkingLotService} from '../../services/parking/parking-lot.service';
 import {ProfileService} from '../../services/user/profile.service';
 import {Person} from '../../model/Person';
@@ -7,9 +7,10 @@ import {Calendar} from '../../model/Calendar';
 import {Usages} from '../../model/Usages';
 import {Usage} from '../../model/Usage';
 import {Constants} from '../../model/Constants';
+import {UserStats} from '../../model/UserStats';
+import { Chart } from 'chart.js';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import {UserStats} from '../../model/UserStats';
 
 @Component({
   selector: 'app-calendar',
@@ -17,16 +18,16 @@ import {UserStats} from '../../model/UserStats';
   styleUrls: ['./calendar.page.scss'],
 })
 export class CalendarPage implements OnInit, OnDestroy {
-  @ViewChild ('doughnutCanvas') doughnutCanvas;
-  doughnutChart: any;
+  @ViewChild ('piechart') piechart;
+  doughnutChart: Chart;
   public calendar: Calendar;
   public usages: Usages;
   public user: Person;
   public stats: UserStats;
   private subs: any[] = [];
-  public stat = 'calendar';
+  public stat = 'CALENDAR';
 
-  constructor(private parkingCtrl: ParkingLotService,
+  constructor(private toastCtrl: ToastController, private parkingCtrl: ParkingLotService,
               private profileCtrl: ProfileService) { }
 
   ngOnInit() {
@@ -62,29 +63,26 @@ export class CalendarPage implements OnInit, OnDestroy {
     this.calendar.changeMonth(-1);
   }
 
-  showWeekdayData(): void {
-    this.doughnutChart = new Chart(this.doughnutCanvas.nativeElement, {
+  showUsageData(): void {
+    if (this.doughnutChart) {
+      this.doughnutChart.destroy();
+    }
+    this.doughnutChart = new Chart(this.piechart.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: [Constants.USAGE.FREE, Constants.USAGE.PARKING, Constants.USAGE.NO_RESPONSE],
         datasets: [{
-          label: '# of Votes',
-          data: [12, 19, 3, 5, 2, 3],
+          label: 'Usage',
+          data: this.stats.getStatsForMonth(this.calendar.currMonth.format('YYYYMM'), this.stat),
           backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
+            '#b7ced5',
+            '#68ff11',
+            '#d5434e'
           ],
           hoverBackgroundColor: [
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56',
-            '#FF6384',
-            '#36A2EB',
-            '#FFCE56'
+            '#d5d5d5',
+            '#75ff8f',
+            '#d56e70'
           ]
         }]
       }
@@ -123,7 +121,11 @@ export class CalendarPage implements OnInit, OnDestroy {
   }
 
   manageSpace(day: Date): any {
-
+    if (moment(day).isSameOrAfter(this.calendar.today, 'day')) {
+      if (this.user.commuteDetails.parkingSpot) {
+        this.toggleFreeSpace(day);
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -132,4 +134,36 @@ export class CalendarPage implements OnInit, OnDestroy {
     });
   }
 
+  private toggleFreeSpace(day: Date): Promise<any> {
+    let title = 'Space Free';
+    const usg = new Usage();
+    usg.source({
+      usageDate: moment(day).format('YYYYMMDD'),
+      user: this.user.uid,
+      company: this.user.commuteDetails.companyName,
+      parkingSpot: this.user.commuteDetails.parkingSpot,
+      usage: Constants.USAGE.FREE,
+      responseTime: moment().format('YYYYMMDD HH:mm:ss')
+    });
+    // if the day clicked is today or in the future AND it has not been previously set to FREE then allow the user to set their
+    // space as free.
+    // If it has been set to FREE then allow the user to cancel this
+    const currUsage: Usage = this.usages.getUsageForDate(day);
+    if (currUsage) {
+      if (currUsage.usage === Constants.USAGE.FREE) {
+        title = 'Free Space Cancelled';
+        usg.usage = Constants.USAGE.PARKING;
+      }
+    }
+    return this.parkingCtrl.updateUsage(currUsage, usg).then(() => {
+      this.toastCtrl.create({
+        message: `${title} for ${moment(day).format('DDD MM, YYYY')}`,
+        duration: 1500,
+        cssClass: 'toast toast-success',
+        position: 'top'
+      }).then((toast) => {
+        toast.present();
+      });
+    });
+  }
 }

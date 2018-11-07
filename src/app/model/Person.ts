@@ -9,14 +9,22 @@ export class Person implements IDBConnector {
   public email: string;
   public uid: string;
   public fullName: string;
-  public createdDatetime: string;
-  public tenureStartDate: string;
+  private createdDatetime: Date;
+  private tenureStartDate: string;
   public commuteDetails: CommuteDetails;
-  public joinDatetime: string;
   public userType: string;
 
   constructor() {
     this.commuteDetails = new CommuteDetails();
+  }
+
+  public getCreatedDateTime(format: string): string {
+    console.log(`${format} ${moment(this.createdDatetime).format(format)}`);
+    return moment(this.createdDatetime).format(format);
+  }
+
+  public getTenure(): string {
+    return moment(this.tenureStartDate, 'YYYYMMDD').fromNow();
   }
 
   getPath(): string {
@@ -44,9 +52,6 @@ export class Person implements IDBConnector {
     if (!this.createdDatetime) {
       res.createdDatetime = moment().format('YYYYMMDD HH:mm:ss');
     }
-    if (this.joinDatetime) {
-      res.joinDatetime = this.joinDatetime;
-    }
     if (this.commuteDetails) {
       res.commuteDetails = this.commuteDetails.sink();
     }
@@ -63,8 +68,7 @@ export class Person implements IDBConnector {
       this.firstName = data.firstName;
       this.lastName = data.lastName;
       this.fullName = `${this.firstName} ${this.lastName}`;
-      this.createdDatetime = moment(data.createDatetime).format( 'YYYYMMDD HH:mm:ss');
-      this.joinDatetime = data.joinDatetime;
+      this.createdDatetime = moment(data.createdDatetime, 'YYYYMMDD HH:mm:ss').toDate();
       this.commuteDetails = data.commuteDetails;
       this.tenureStartDate = data.tenureStartDate;
       this.uid = data.uid;

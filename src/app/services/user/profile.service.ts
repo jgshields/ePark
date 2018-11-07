@@ -58,12 +58,19 @@ export class ProfileService {
     });
   }
 
-  updateCommuteDeatils(vehicle: string, companyName: string, parkingSpot: string): Promise<any> {
-    const commuteDetails: CommuteDetails = new CommuteDetails();
-    commuteDetails.vehicle = vehicle;
-    commuteDetails.parkingSpot = parkingSpot;
-    commuteDetails.companyName = companyName;
-    return this.afDb.object(this.user.getPath()).update({commuteDetails});
+  updateParkingSpot(parkingSpot: string): Promise<any> {
+    this.user.commuteDetails.parkingSpot = parkingSpot;
+    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
+  }
+
+  updateCompany(companyName: string): Promise<any> {
+    this.user.commuteDetails.companyName = companyName;
+    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
+  }
+
+  updateVehicleDetails(vehicle: string): Promise<any> {
+    this.user.commuteDetails.vehicle = vehicle;
+    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
   }
 
 }

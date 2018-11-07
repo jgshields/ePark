@@ -20,12 +20,14 @@ export class AdminPage implements OnInit {
 
   ngOnInit() {
     this.companies = this.parkingCtrl.getCompanies().snapshotChanges().pipe(
-      map((changes => changes.map(c => ({
-        id: c.key,
-            name: c.payload.val()}))
-      )
-      ));
+      map((changes => changes.map(c => ({id: c.key, name: c.payload.val()}))))
+    );
   }
+
+  resetStats(): void {
+    this.parkingCtrl.runStatsJob();
+  }
+
   async addCompany(): Promise<any> {
     const name = '';
     const alert = await this.alertCtrl.create({
@@ -42,7 +44,9 @@ export class AdminPage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.parkingCtrl.addCompany(new Company(data.name));
+            const company: Company = new Company();
+            company.name = data.name;
+            this.parkingCtrl.addCompany(company);
           }
         }
       ]

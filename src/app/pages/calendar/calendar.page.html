@@ -9,14 +9,12 @@
 
 <ion-content padding>
   <ion-segment [(ngModel)]="stat">
-    <ion-segment-button value="calendar">Calendar
-    </ion-segment-button>
-    <ion-segment-button value="weekdays" (click)="showWeekdayData()">Weekdays
-    </ion-segment-button>
-    <ion-segment-button value="allDays">All Days
-    </ion-segment-button>
+    <ion-segment-button value="CALENDAR">Calendar</ion-segment-button>
+    <ion-segment-button value="WEEKDAY" (click)="showUsageData()">Weekdays</ion-segment-button>
+    <ion-segment-button value="ALL" (click)="showUsageData()">All Days</ion-segment-button>
+    <ion-segment-button value="WEEKEND" (click)="showUsageData()">Weekends</ion-segment-button>
   </ion-segment>
-  <div *ngIf="stat === 'calendar'">
+  <div *ngIf="stat === 'CALENDAR'">
     <ion-grid id="calendar">
       <ion-row no-margin no-padding>
         <ion-col col-1 offset-1 offset-md-3>
@@ -40,8 +38,8 @@
     </ion-grid>
   </div>
 
-  <div *ngIf="stat === 'weekdays'">
-    <canvas #doughnutCanvas></canvas>
+  <div *ngIf="stat !== 'CALENDAR'">
+    <canvas #piechart></canvas>
   </div>
 
 </ion-content>
