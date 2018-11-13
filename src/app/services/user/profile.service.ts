@@ -3,7 +3,6 @@ import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {Person} from '../../model/Person';
 import * as firebase from 'firebase';
-import {CommuteDetails} from '../../model/CommuteDetails';
 
 @Injectable({
   providedIn: 'root'

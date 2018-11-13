@@ -8,7 +8,7 @@ import {Person} from '../../model/Person';
 import {Calendar} from '../../model/Calendar';
 import * as moment from 'moment';
 import * as _ from 'lodash';
-import {async} from 'rxjs/internal/scheduler/async';
+import ThenableReference = firebase.database.ThenableReference;
 
 @Injectable({
   providedIn: 'root'
@@ -28,8 +28,8 @@ export class ParkingLotService {
     });
   }
 
-  addCompany(company: Company): void {
-    this.afDb.list('company').push(company.name);
+  addCompany(company: Company): ThenableReference {
+    return this.afDb.list('company').push(company.name);
   }
 
   getCompanies(): AngularFireList<any> {
@@ -47,7 +47,7 @@ export class ParkingLotService {
 
   runStatsJob(): Promise<any> {
     return new Promise<any>(resolve => {
-      const path = '/compani';
+      const path = '/company';
       this.afDb.list(path).snapshotChanges().subscribe((snap) => {
         _.forEach(snap, (item) => {
           console.log(item.key);
@@ -83,14 +83,7 @@ export class ParkingLotService {
       }
     });
   }
-
-  private updateParkingStats(currUsage: Usage, usage: Usage): void {
-    const datesToUpdate: any[] = [];
-
-    datesToUpdate.push(moment(usage.usageDate).format('YYYYMMDD'));
-    datesToUpdate.push(moment(usage.usageDate).format('YYYYMM'));
-    datesToUpdate.push(moment(usage.usageDate).format('YYYY'));
-
+  private updateUserParkingStats(currUsage: Usage, usage: Usage): void {
     // update the users stats for the month in question.
     if (!currUsage) {
       // first time in. no usage exists.
@@ -137,51 +130,71 @@ export class ParkingLotService {
         }
       }
     }
-    // loop thru the dates call the transaction to update the company stats
-    for (let i = 0; i < 3; i++) {
-      if (!currUsage) {
-        // first time in. no usage exists.
-        if (usage.usage === Constants.USAGE.FREE) {
-          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
+  }
+
+  private updateCompanyParkingStats(currUsage: Usage, usage: Usage, dateToUpdate: string): void {
+    if (!currUsage) {
+      // first time in. no usage exists.
+      if (usage.usage === Constants.USAGE.FREE) {
+        this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.FREE}`);
+        // if the update is happening at a monthly or a yearly level
+        if (dateToUpdate.length !== 8) {
           if (Calendar.isWeekend(usage.usageDate)) {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.FREE}`);
           } else {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
-          }
-        } else {
-          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
-          if (Calendar.isWeekend(usage.usageDate)) {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
-          } else {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.FREE}`);
           }
         }
       } else {
-        // if we are parking and a record has already been written for that user on that day...
-        if (usage.usage === Constants.USAGE.PARKING && currUsage.usage === Constants.USAGE.FREE) {
-          this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
-          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
+        this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.PARKING}`);
+        if (dateToUpdate.length !== 8) {
           if (Calendar.isWeekend(usage.usageDate)) {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
-            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.PARKING}`);
           } else {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
-            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.PARKING}`);
           }
         }
-        // if we are not parking and a record has already been written for that user on that day...
-        if (usage.usage === Constants.USAGE.FREE && currUsage.usage === Constants.USAGE.PARKING) {
-          this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.FREE}`);
-          this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/${Constants.USAGE.PARKING}`);
+      }
+    } else {
+      // if we are parking and a record has already been written for that user on that day...
+      if (usage.usage === Constants.USAGE.PARKING && currUsage.usage === Constants.USAGE.FREE) {
+        this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.FREE}`);
+        this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.PARKING}`);
+        if (dateToUpdate.length !== 8) {
           if (Calendar.isWeekend(usage.usageDate)) {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.FREE}`);
-            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekends/${Constants.USAGE.PARKING}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.PARKING}`);
+            this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.FREE}`);
           } else {
-            this.incrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.FREE}`);
-            this.decrementStatistic(`stats/${usage.company}/${datesToUpdate[i]}/weekdays/${Constants.USAGE.PARKING}`);
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.PARKING}`);
+            this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.FREE}`);
+          }
+        }
+      }
+      // if we are not parking and a record has already been written for that user on that day...
+      if (usage.usage === Constants.USAGE.FREE && currUsage.usage === Constants.USAGE.PARKING) {
+        this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.FREE}`);
+        this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/${Constants.USAGE.PARKING}`);
+        if (dateToUpdate.length !== 8) {
+          if (Calendar.isWeekend(usage.usageDate)) {
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.FREE}`);
+            this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekends/${Constants.USAGE.PARKING}`);
+          } else {
+            this.incrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.FREE}`);
+            this.decrementStatistic(`stats/${usage.company}/${dateToUpdate}/weekdays/${Constants.USAGE.PARKING}`);
           }
         }
       }
     }
+  }
+
+  private updateParkingStats(currUsage: Usage, usage: Usage): void {
+    // update the parking stats for the user
+    this.updateUserParkingStats(currUsage, usage);
+    // update the daily parking stats
+    this.updateCompanyParkingStats(currUsage, usage, moment(usage.usageDate).format('YYYYMMDD'));
+    // update the monthly parking stats
+    this.updateCompanyParkingStats(currUsage, usage, moment(usage.usageDate).format('YYYYMM'));
+    // update the annual parking stats
+    this.updateCompanyParkingStats(currUsage, usage, moment(usage.usageDate).format('YYYY'));
   }
 }

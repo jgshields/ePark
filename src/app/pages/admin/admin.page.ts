@@ -11,8 +11,10 @@ import {AlertController, LoadingController, ToastController} from '@ionic/angula
   styleUrls: ['./admin.page.scss'],
 })
 export class AdminPage implements OnInit {
+
   public loading: HTMLIonLoadingElement;
   companies: Observable<any[]>;
+
   constructor(private parkingCtrl: ParkingLotService,
               private alertCtrl: AlertController,
               private loadingCtrl: LoadingController,

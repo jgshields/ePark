@@ -114,8 +114,6 @@ export class ProfilePage implements OnInit {
     await alert.present();
   }
 
-
-
   async updateCompany(): Promise<void> {
     const radios: any [] = [];
     let i;
