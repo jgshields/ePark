@@ -20,19 +20,30 @@ export class UserStats implements IDBConnector {
   }
 
   getStatsForMonth(month: string, type: Constants.STATTYPE): number[] {
-    console.log(month);
+    // get the stats for that month
     const stat: UserStat = _.find(this.monthlyStats, (item) => {
       return item.month === month;
     });
-    switch (type) {
-      case Constants.STATTYPE.ALL:
-        return stat.getTotalStats();
-      case Constants.STATTYPE.WEEKDAY:
-        return stat.getWeekdayStats();
-      case Constants.STATTYPE.WEEKEND:
-        return stat.getWeekendStats();
-      default:
-        return stat.getWeekdayStats();
+
+    // If there are stats for that month return the one of a relevant type
+    if (stat) {
+      switch (type) {
+        case Constants.STATTYPE.ALL:
+          return stat.getTotalStats();
+        case Constants.STATTYPE.WEEKDAY:
+          return stat.getWeekdayStats();
+        case Constants.STATTYPE.WEEKEND:
+          return stat.getWeekendStats();
+        default:
+          return stat.getWeekdayStats();
+      }
+    } else {
+      // If not create one with no data
+      const stats: number[] = [];
+      stats.push(0);
+      stats.push(0);
+      stats.push(0);
+      return stats;
     }
   }
 

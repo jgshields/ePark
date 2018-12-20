@@ -26,8 +26,12 @@ export class AdminPage implements OnInit {
     );
   }
 
-  resetStats(): void {
-    this.parkingCtrl.runStatsJob();
+  async resetStats(): Promise<any> {
+    this.parkingCtrl.runStatsJob().then(() => {
+      this.loading.dismiss();
+    });
+    this.loading = await this.loadingCtrl.create();
+    await this.loading.present();
   }
 
   async addCompany(): Promise<any> {

@@ -6,7 +6,7 @@ import {Person} from '../../model/Person';
 import {ParkingLotService} from '../../services/parking/parking-lot.service';
 import {Company} from '../../model/Company';
 import * as _ from 'lodash';
-
+import * as moment from 'moment';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -15,6 +15,7 @@ import * as _ from 'lodash';
 export class ProfilePage implements OnInit {
   public person: Person;
   public companies: Company[];
+  public tenureStart: Date;
 
   constructor(private alertCtrl: AlertController,
               private authService: AuthService,
@@ -25,6 +26,7 @@ export class ProfilePage implements OnInit {
     this.profileService.getUserProfile().valueChanges().subscribe( (snap) => {
       this.person = new Person();
       this.person.source(snap);
+      this.tenureStart = moment(this.person.tenureStartDate, 'YYYYMMDD').toDate();
     });
     this.companies = [];
     this.parkingService.getCompanies().snapshotChanges().subscribe((snap) => {
@@ -191,5 +193,9 @@ export class ProfilePage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  updateTenureStartDate(): void {
+    this.profileService.updateTenureStartDate(this.tenureStart);
   }
 }

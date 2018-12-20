@@ -31,8 +31,18 @@
       <ion-label>
         <ion-grid>
           <ion-row>
-            <ion-col class="text-left" [size]="5">First Use</ion-col>
+            <ion-col class="text-left" [size]="5">First Login</ion-col>
             <ion-col class="text-left" [size]="7">{{person?.getCreatedDateTime('ddd DD MMM, YYYY')}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <ion-grid>
+          <ion-row>
+            <ion-col class="text-left" [size]="5">Last Parking Date</ion-col>
+            <ion-col class="text-left" [size]="7"></ion-col>
           </ion-row>
         </ion-grid>
       </ion-label>
@@ -60,6 +70,28 @@
     </ion-item>
   </ion-list>
   <ion-list>
+    <ion-list-header text-center>Company Information</ion-list-header>
+    <ion-item>
+      <ion-label>
+        <ion-grid>
+          <ion-row>
+            <ion-col class="text-left" size="4">Company</ion-col>
+            <ion-col class="text-left" size="4">Tenure Start</ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName" (click)="updateCompany()">{{person?.commuteDetails.companyName}}</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.companyName" (click)="updateCompany()">
+              <ion-icon slot="icon-only" name="add"></ion-icon>
+            </ion-col>
+            <ion-col class="text-center" size="4">
+              <ion-datetime displayFormat="DD MMM, YYYY" [(ngModel)]="tenureStart" doneText="Save" placeholder="Enter Start Date in Company" (ionChange)="updateTenureStartDate(tenureStart)"></ion-datetime>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list>
     <ion-list-header text-center>Commute Information</ion-list-header>
     <ion-item>
       <ion-label>
@@ -71,8 +103,17 @@
           </ion-row>
           <ion-row>
             <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.vehicle" (click)="updateVehicle()">{{person?.commuteDetails.vehicle}}</ion-col>
-            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName" (click)="updateCompany()">{{person?.commuteDetails.companyName}} ({{person.getTenure()}})</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.vehicle" (click)="updateVehicle()">
+              <ion-icon slot="icon-only" name="add"></ion-icon>
+            </ion-col>
+            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName" (click)="updateCompany()">{{person?.commuteDetails.companyName}}</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.companyName" (click)="updateCompany()">
+              <ion-icon slot="icon-only" name="add"></ion-icon>
+            </ion-col>
             <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.parkingSpot" (click)="updateParkingSpot()">{{person?.commuteDetails.parkingSpot}}</ion-col>
+            <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.parkingSpot" (click)="updateParkingSpot()">
+              <ion-icon slot="icon-only" name="add"></ion-icon>
+            </ion-col>
           </ion-row>
         </ion-grid>
       </ion-label>

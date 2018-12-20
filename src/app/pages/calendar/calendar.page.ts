@@ -56,11 +56,20 @@ export class CalendarPage implements OnInit, OnDestroy {
   }
 
   nextMonth(): void {
-    this.calendar.changeMonth(1);
+    // only allow the user to go 3 months into the future.
+    // Probably need to make this configurable.
+    console.log(`3months ahead ${moment().startOf('month').add(3, 'month').format('YYYYMMDD')}`);
+    console.log(`curr month ${this.calendar.currMonth.format('YYYYMMDD')}`);
+    if (!this.calendar.currMonth.isAfter(moment().startOf('month').add(3, 'month'))) {
+      this.calendar.changeMonth(1);
+    }
   }
 
   previousMonth(): void {
-    this.calendar.changeMonth(-1);
+    // Don't allow the user to go further back into the past than their first login date.
+    if (this.calendar.currMonth.isAfter(moment(this.user.getCreatedDateTime('YYYYMMDD'), 'YYYYMMDD').startOf('month'))) {
+      this.calendar.changeMonth(-1);
+    }
   }
 
   showUsageData(): void {

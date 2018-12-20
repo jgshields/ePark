@@ -15,6 +15,10 @@ export class Usage implements IDBConnector {
     return `usage/${this.company}/${this.user}/${this.usageDate}`;
   }
 
+  toString(): string {
+    return JSON.stringify(this.sink());
+  }
+
   sink(): any {
     const res: any = {};
     res.user = this.user;

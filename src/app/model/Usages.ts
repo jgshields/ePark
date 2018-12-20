@@ -13,9 +13,20 @@ export class Usages {
   constructor() {
   }
 
+  public numUsages(): number {
+    return this.usages.length;
+  }
+
   public addUsage(usage: Usage): void {
     this.usages.push(usage);
     this.calculateUsageDates();
+  }
+
+  public getUsage(index: number): Usage {
+    if (index >= this.usages.length) {
+      return null;
+    }
+    return this.usages[index];
   }
 
   public removeUsage(usage: Usage): void {
@@ -38,7 +49,6 @@ export class Usages {
     this.firstUsageDate = moment(usg.usageDate, 'YYYYMMDD').toDate();
 
   }
-
 
   public isDateInPeriod(dateToCheck: Date): boolean {
     const dtToChk = moment(dateToCheck);

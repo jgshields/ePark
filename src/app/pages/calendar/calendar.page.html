@@ -17,7 +17,7 @@
   <div *ngIf="stat === 'CALENDAR'">
     <ion-grid id="calendar">
       <ion-row no-margin no-padding>
-        <ion-col col-1 offset-1 offset-md-3>
+        <ion-col col-1>
           <ion-icon name="arrow-dropleft" (click)="previousMonth()" class="next-prev"></ion-icon>
         </ion-col>
         <ion-label col-10>{{calendar.currMonth.format('MMM')}} {{calendar.currMonth.format('YYYY')}}</ion-label>
