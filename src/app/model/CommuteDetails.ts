@@ -19,7 +19,7 @@ export class CommuteDetails implements IDBConnector {
     const res: any = {};
     res.vehicle = this.vehicle;
     res.companyName = this.companyName;
-    res.parkingSot = this.parkingSpot;
+    res.parkingSpot = this.parkingSpot;
     return res;
   }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {AlertController} from '@ionic/angular';
+import {AlertController, ToastController} from '@ionic/angular';
 import {ProfileService} from '../../services/user/profile.service';
 import {AuthService} from '../../services/user/auth.service';
 import {Person} from '../../model/Person';
@@ -15,18 +15,25 @@ import * as moment from 'moment';
 export class ProfilePage implements OnInit {
   public person: Person;
   public companies: Company[];
-  public tenureStart: Date;
+  public tenureStart: any;
+  public today: string;
 
   constructor(private alertCtrl: AlertController,
+              private toastCtrl: ToastController,
               private authService: AuthService,
               private profileService: ProfileService,
               private parkingService: ParkingLotService) { }
 
   ngOnInit() {
+    this.today = moment().format('YYYY-MM-DD');
     this.profileService.getUserProfile().valueChanges().subscribe( (snap) => {
       this.person = new Person();
       this.person.source(snap);
-      this.tenureStart = moment(this.person.tenureStartDate, 'YYYYMMDD').toDate();
+      if (this.person.tenureStartDate) {
+        this.tenureStart = moment(this.person.tenureStartDate).format('YYYY-MM-DD');
+      } else {
+        this.tenureStart = moment().format('YYYY-MM-DD');
+      }
     });
     this.companies = [];
     this.parkingService.getCompanies().snapshotChanges().subscribe((snap) => {
@@ -56,7 +63,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateEmail(data.newEmail, data.password);
+            this.profileService.updateEmail(data.newEmail, data.password).then(() => {
+              this.toastCtrl.create({
+                message: `Email Changed: ${data.newEmail}`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -81,7 +97,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updatePassword(data.newPassword, data.oldPassword);
+            this.profileService.updatePassword(data.newPassword, data.oldPassword).then(() => {
+              this.toastCtrl.create({
+                message: `Password Changed`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -109,7 +134,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateName(data.firstName, data.lastName);
+            this.profileService.updateName(data.firstName, data.lastName).then(() => {
+              this.toastCtrl.create({
+                message: `Name Saved: ${data.firstName} ${data.lastName}`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -147,7 +181,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateCompany(data);
+            this.profileService.updateCompany(data).then(() => {
+              this.toastCtrl.create({
+                message: `Company Details Saved: ${data}`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -168,7 +211,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateParkingSpot(data.parkingSpot);
+            this.profileService.updateParkingSpot(data.parkingSpot).then(() => {
+              this.toastCtrl.create({
+                message: `Parking Spot Details Saved: ${data.parkingSpot}`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -188,7 +240,16 @@ export class ProfilePage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            this.profileService.updateVehicleDetails(data.vehicle);
+            this.profileService.updateVehicleDetails(data.vehicle).then(() => {
+              this.toastCtrl.create({
+                message: `Vehicle Details Saved: ${data.vehicle}`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }}
       ]
     });
@@ -196,6 +257,22 @@ export class ProfilePage implements OnInit {
   }
 
   updateTenureStartDate(): void {
-    this.profileService.updateTenureStartDate(this.tenureStart);
+    const dt: string = moment()
+        .year(this.tenureStart.year.value)
+        .month(this.tenureStart.month.value - 1)
+        .date(this.tenureStart.day.value).format('YYYYMMDD');
+    console.log(`tenure start date: ${dt}`);
+    if (this.tenureStart) {
+      this.profileService.updateTenureStartDate(dt).then(() => {
+        this.toastCtrl.create({
+          message: `Company Start Date Saved: ${moment(this.tenureStart, 'YYYY-MM-DD').format('DD MMM, YYYY')}`,
+          duration: 1500,
+          cssClass: 'toast toast-success',
+          position: 'top'
+        }).then((toast) => {
+          toast.present();
+        });
+      });
+    }
   }
 }

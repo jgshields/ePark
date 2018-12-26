@@ -11,7 +11,8 @@ const routes: Routes = [
   { path: 'reset-password', loadChildren: './pages/reset-password/reset-password.module#ResetPasswordPageModule'},
   { path: 'signup', loadChildren: './pages/signup/signup.module#SignupPageModule' },
   { path: 'admin', loadChildren: './pages/admin/admin.module#AdminPageModule', canActivate: [AuthGuard, AdminGuard]},
-  { path: 'calendar', loadChildren: './pages/calendar/calendar.module#CalendarPageModule' , canActivate: [AuthGuard]}
+  { path: 'calendar', loadChildren: './pages/calendar/calendar.module#CalendarPageModule' , canActivate: [AuthGuard]},
+  { path: 'parking-spaces', loadChildren: './pages/parking-spaces/parking-spaces.module#ParkingSpacesPageModule' }
 ];
 
 @NgModule({

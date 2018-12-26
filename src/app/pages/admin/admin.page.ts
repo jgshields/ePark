@@ -4,6 +4,7 @@ import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {Company} from '../../model/Company';
 import {AlertController, LoadingController, ToastController} from '@ionic/angular';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-admin',
@@ -18,7 +19,8 @@ export class AdminPage implements OnInit {
   constructor(private parkingCtrl: ParkingLotService,
               private alertCtrl: AlertController,
               private loadingCtrl: LoadingController,
-              private toastCtrl: ToastController) { }
+              private toastCtrl: ToastController,
+              private routeCtrl: Router) { }
 
   ngOnInit() {
     this.companies = this.parkingCtrl.getCompanies().snapshotChanges().pipe(
@@ -29,9 +31,21 @@ export class AdminPage implements OnInit {
   async resetStats(): Promise<any> {
     this.parkingCtrl.runStatsJob().then(() => {
       this.loading.dismiss();
+      this.toastCtrl.create({
+        message: `Stats Setup Completed`,
+        duration: 1500,
+        cssClass: 'toast toast-success',
+        position: 'top'
+      }).then((toast) => {
+        toast.present();
+      });
     });
     this.loading = await this.loadingCtrl.create();
     await this.loading.present();
+  }
+
+  createUsages(): void {
+    this.routeCtrl.navigate(['parking-spaces']);
   }
 
   async addCompany(): Promise<any> {
@@ -52,7 +66,16 @@ export class AdminPage implements OnInit {
           handler: data => {
             const company: Company = new Company();
             company.name = data.name;
-            this.parkingCtrl.addCompany(company);
+            this.parkingCtrl.addCompany(company).then(() => {
+              this.toastCtrl.create({
+                message: `New Company ${company} Added`,
+                duration: 1500,
+                cssClass: 'toast toast-success',
+                position: 'top'
+              }).then((toast) => {
+                toast.present();
+              });
+            });
           }
         }
       ]

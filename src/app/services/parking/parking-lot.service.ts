@@ -1,4 +1,4 @@
-import {ANALYZE_FOR_ENTRY_COMPONENTS, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import {Usage} from '../../model/Usage';
 import {Company} from '../../model/Company';
@@ -7,11 +7,8 @@ import {Constants} from '../../model/Constants';
 import {Person} from '../../model/Person';
 import {Calendar} from '../../model/Calendar';
 import * as moment from 'moment';
-import * as _ from 'lodash';
 import ThenableReference = firebase.database.ThenableReference;
-import {compareNumbers} from '@angular/compiler-cli/src/diagnostics/typescript_version';
 import {Usages} from '../../model/Usages';
-import {v} from '@angular/core/src/render3';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +16,11 @@ import {v} from '@angular/core/src/render3';
 export class ParkingLotService {
 
   constructor(private afDb: AngularFireDatabase) {
+  }
+
+  private runUserStatsJob(usages: Usages): any {
+    const stats = {};
+    return stats;
   }
 
   getTodaysUsage(path: string): AngularFireObject<any> {
@@ -152,11 +154,6 @@ export class ParkingLotService {
         stats[usg.company][month]['Weekdays'][usg.usage] ++;
       }
     }
-    return stats;
-  }
-
-  private runUserStatsJob(usages: Usages): any {
-    const stats = {};
     return stats;
   }
   private incrementStatistic(path: string) {

@@ -3,7 +3,6 @@ import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {Person} from '../../model/Person';
 import * as firebase from 'firebase';
-import * as moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +31,9 @@ export class ProfileService {
     return this.afDb.object(this.user.getPath()).update({firstName, lastName});
   }
 
-  updateTenureStartDate(date: any): Promise<any> {
-    const tenureStartDate: string = moment(date).format('YYYYMMDD');
-    return this.afDb.object(this.user.getPath()).update({tenureStartDate});
+  updateTenureStartDate(date: string): Promise<any> {
+    console.log(`tenureStartDate: ${date}`);
+    return this.afDb.object(this.user.getPath()).update({tenureStartDate: date});
   }
 
 

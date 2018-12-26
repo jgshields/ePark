@@ -84,7 +84,7 @@
               <ion-icon slot="icon-only" name="add"></ion-icon>
             </ion-col>
             <ion-col class="text-center" size="4">
-              <ion-datetime displayFormat="DD MMM, YYYY" [(ngModel)]="tenureStart" doneText="Save" placeholder="Enter Start Date in Company" (ionChange)="updateTenureStartDate(tenureStart)"></ion-datetime>
+              <ion-datetime [max]="" pickerFormat="YYYYMMDD" displayFormat="DD MMM, YYYY" [(ngModel)]="tenureStart" doneText="Save" (ngModelChange)="updateTenureStartDate()"></ion-datetime>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -98,16 +98,11 @@
         <ion-grid>
           <ion-row>
             <ion-col class="text-left" size="4">Vehicle</ion-col>
-            <ion-col class="text-left" size="4">Company</ion-col>
             <ion-col class="text-left" size="4">Parking Spot</ion-col>
           </ion-row>
           <ion-row>
             <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.vehicle" (click)="updateVehicle()">{{person?.commuteDetails.vehicle}}</ion-col>
             <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.vehicle" (click)="updateVehicle()">
-              <ion-icon slot="icon-only" name="add"></ion-icon>
-            </ion-col>
-            <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.companyName" (click)="updateCompany()">{{person?.commuteDetails.companyName}}</ion-col>
-            <ion-col class="text-center" size="4" *ngIf="!person?.commuteDetails.companyName" (click)="updateCompany()">
               <ion-icon slot="icon-only" name="add"></ion-icon>
             </ion-col>
             <ion-col class="text-center" size="4" *ngIf="person?.commuteDetails.parkingSpot" (click)="updateParkingSpot()">{{person?.commuteDetails.parkingSpot}}</ion-col>
