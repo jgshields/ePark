@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin"></ion-back-button>
+    </ion-buttons>
+    <ion-title text-center>Manage Parking Spaces</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="10">
+        <ion-card>
+          <ion-card-header>{{company}}</ion-card-header>
+        </ion-card>
+      </ion-col>
+      <ion-col size="2">
+        <ion-button (click)="addParkingSpace()">
+          Add Parking Space
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="4" *ngFor="let space of parkingSpaces | async">
+        <ion-card tappable>
+          <ion-card-header>{{space.id}} {{space.assignedTo}}</ion-card-header>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

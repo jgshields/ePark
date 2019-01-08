@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Parking Spots</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-card>
+    <ion-card-content>
+      <input [(ngModel)]="searchStr" type="text" class="input" placeholder="Parking Spot: " (keyup)="search()">
+      <ion-list>
+        <ion-item *ngFor="let spot of spots" (click)="selectSpot(spot.id)" lines="full">
+          {{spot.id}} {{spot.assignedTo}}
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+  <ion-button (click)="dismiss()">Close</ion-button>
+</ion-content>
