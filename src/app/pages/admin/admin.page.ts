@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {Company} from '../../model/Company';
 import {AlertController, LoadingController, ToastController} from '@ionic/angular';
 import {Router} from '@angular/router';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-admin',
@@ -14,7 +15,7 @@ import {Router} from '@angular/router';
 export class AdminPage implements OnInit {
 
   public loading: HTMLIonLoadingElement;
-  companies: Observable<any[]>;
+  public companies: Observable<any[]>;
 
   constructor(private parkingCtrl: ParkingLotService,
               private alertCtrl: AlertController,
@@ -24,8 +25,7 @@ export class AdminPage implements OnInit {
 
   ngOnInit() {
     this.companies = this.parkingCtrl.getCompanies().snapshotChanges().pipe(
-      map((changes => changes.map(c => ({id: c.key, name: c.payload.val()}))))
-    );
+        map((changes) => changes.map((c) => ({name: c.payload.val().displayName, count: c.payload.val().count}))));
   }
 
   async resetStats(): Promise<any> {
@@ -45,6 +45,10 @@ export class AdminPage implements OnInit {
   }
 
   createUsages(): void {
+  }
+
+  manageParkingSpaces(company: any): void {
+    this.parkingCtrl.setNavParams('company', company.name.toLowerCase());
     this.routeCtrl.navigate(['parking-spaces']);
   }
 
@@ -64,11 +68,9 @@ export class AdminPage implements OnInit {
         {text: 'Cancel'},
         {text: 'Save',
           handler: data => {
-            const company: Company = new Company();
-            company.name = data.name;
-            this.parkingCtrl.addCompany(company).then(() => {
+            this.parkingCtrl.addCompany(data.name).then(() => {
               this.toastCtrl.create({
-                message: `New Company ${company} Added`,
+                message: `New Company ${data.name} Added`,
                 duration: 1500,
                 cssClass: 'toast toast-success',
                 position: 'top'

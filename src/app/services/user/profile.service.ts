@@ -3,6 +3,7 @@ import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {Person} from '../../model/Person';
 import * as firebase from 'firebase';
+import {Constants} from '../../model/Constants';
 
 @Injectable({
   providedIn: 'root'
@@ -65,12 +66,22 @@ export class ProfileService {
 
   updateParkingSpot(parkingSpot: string): Promise<any> {
     this.user.commuteDetails.parkingSpot = parkingSpot;
-    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
+    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails).then(() => {
+      this.afDb.object(`companies/${this.user.commuteDetails.companyName.toLowerCase()}/spaces/${parkingSpot}`)
+          .update({assignedTo: this.user.uid});
+    });
   }
 
   updateCompany(companyName: string): Promise<any> {
-    this.user.commuteDetails.companyName = companyName;
-    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
+    if (this.user.commuteDetails.companyName !== companyName) {
+      const spotToClear: any = {};
+      spotToClear[this.user.commuteDetails.parkingSpot] = Constants.USAGE.UNASSIGNED;
+      this.user.commuteDetails.companyName = companyName;
+      this.user.commuteDetails.parkingSpot = '';
+      return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails).then(() => {
+        this.afDb.object(`/companies/${companyName.toLowerCase()}`).update(spotToClear);
+      });
+    }
   }
 
   updateVehicleDetails(vehicle: string): Promise<any> {

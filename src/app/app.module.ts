@@ -8,6 +8,8 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import {firebaseConfig} from './config/credentials';
+import {CompanyListPageModule} from './pages/modals/company-list/company-list.module';
+import {ParkingSpotListPageModule} from './pages/modals/parking-spot-list/parking-spot-list.module';
 
 
 @NgModule({
@@ -20,6 +22,8 @@ import {firebaseConfig} from './config/credentials';
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
     AngularFireDatabaseModule,
+    CompanyListPageModule,
+    ParkingSpotListPageModule
   ],
   providers:
   [

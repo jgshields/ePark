@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {AlertController, ToastController} from '@ionic/angular';
+import {AlertController, ModalController, ToastController} from '@ionic/angular';
 import {ProfileService} from '../../services/user/profile.service';
 import {AuthService} from '../../services/user/auth.service';
 import {Person} from '../../model/Person';
@@ -7,6 +7,11 @@ import {ParkingLotService} from '../../services/parking/parking-lot.service';
 import {Company} from '../../model/Company';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
+import {ModalsPlugin} from '@capacitor/core';
+import {CompanyListPage} from '../modals/company-list/company-list.page';
+import {ParkingSpotListPage} from '../modals/parking-spot-list/parking-spot-list.page';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
@@ -14,35 +19,29 @@ import * as moment from 'moment';
 })
 export class ProfilePage implements OnInit {
   public person: Person;
-  public companies: Company[];
+  public companies: Observable<any[]>;
   public tenureStart: any;
   public today: string;
 
   constructor(private alertCtrl: AlertController,
               private toastCtrl: ToastController,
+              private modalCtrl: ModalController,
               private authService: AuthService,
               private profileService: ProfileService,
-              private parkingService: ParkingLotService) { }
+              private parkingCtrl: ParkingLotService) { }
 
   ngOnInit() {
     this.today = moment().format('YYYY-MM-DD');
     this.profileService.getUserProfile().valueChanges().subscribe( (snap) => {
       this.person = new Person();
       this.person.source(snap);
-      if (this.person.tenureStartDate) {
-        this.tenureStart = moment(this.person.tenureStartDate).format('YYYY-MM-DD');
-      } else {
-        this.tenureStart = moment().format('YYYY-MM-DD');
-      }
+      this.tenureStart = moment(this.person.tenureStartDate).format('YYYY-MM-DD');
     });
-    this.companies = [];
-    this.parkingService.getCompanies().snapshotChanges().subscribe((snap) => {
-      _.forEach(snap, (item) => {
-        const company: Company = new Company();
-        company.source(item);
-        this.companies.push(company);
-      });
-    });
+    this.companies = this.parkingCtrl.getCompanies().snapshotChanges().pipe(
+        map(changes =>
+            changes.map(c => ({ name: c.payload.key, ...c.payload.val() }))
+        )
+    );
   }
 
   async updateEmail(): Promise<void> {
@@ -64,14 +63,7 @@ export class ProfilePage implements OnInit {
         {text: 'Save',
           handler: data => {
             this.profileService.updateEmail(data.newEmail, data.password).then(() => {
-              this.toastCtrl.create({
-                message: `Email Changed: ${data.newEmail}`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
+              this.showToast(`Email Changed: ${data.newEmail}`);
             });
           }}
       ]
@@ -98,14 +90,7 @@ export class ProfilePage implements OnInit {
         {text: 'Save',
           handler: data => {
             this.profileService.updatePassword(data.newPassword, data.oldPassword).then(() => {
-              this.toastCtrl.create({
-                message: `Password Changed`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
+              this.showToast('Password Changed');
             });
           }}
       ]
@@ -135,14 +120,7 @@ export class ProfilePage implements OnInit {
         {text: 'Save',
           handler: data => {
             this.profileService.updateName(data.firstName, data.lastName).then(() => {
-              this.toastCtrl.create({
-                message: `Name Saved: ${data.firstName} ${data.lastName}`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
+              this.showToast(`Name Saved: ${data.firstName} ${data.lastName}`);
             });
           }}
       ]
@@ -151,80 +129,20 @@ export class ProfilePage implements OnInit {
   }
 
   async updateCompany(): Promise<void> {
-    const radios: any [] = [];
-    let i;
-    let company: Company;
-    for (i = 0; i < this.companies.length; i++) {
-      company = this.companies[i];
-      if (company.name === this.person.commuteDetails.companyName) {
-        radios.push({
-          type: 'radio',
-          label: company.name,
-          value: company.name,
-          checked: true
-        });
-      } else {
-        radios.push({
-          type: 'radio',
-          label: company.name,
-          value: company.name,
-          checked: false
-        });
-      }
-    }
-
-    const alert = await this.alertCtrl.create(
-    {
-      subHeader: 'Update Company',
-      inputs: radios,
-      buttons: [
-        {text: 'Cancel'},
-        {text: 'Save',
-          handler: data => {
-            this.profileService.updateCompany(data).then(() => {
-              this.toastCtrl.create({
-                message: `Company Details Saved: ${data}`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
-            });
-          }}
-      ]
+    const modal = await this.modalCtrl.create({
+      component: CompanyListPage
     });
-    await alert.present();
+    await modal.present();
   }
 
   async updateParkingSpot(): Promise<void> {
-    const alert = await this.alertCtrl.create({
-      subHeader: 'Update Parking Spot',
-      inputs: [
-        {
-          type: 'text',
-          name: 'parkingSpot',
-          value: this.person.commuteDetails.parkingSpot
-        }
-      ],
-      buttons: [
-        {text: 'Cancel'},
-        {text: 'Save',
-          handler: data => {
-            this.profileService.updateParkingSpot(data.parkingSpot).then(() => {
-              this.toastCtrl.create({
-                message: `Parking Spot Details Saved: ${data.parkingSpot}`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
-            });
-          }}
-      ]
+    const modal = await this.modalCtrl.create({
+      component: ParkingSpotListPage,
+      componentProps: {
+        companyName: this.person.commuteDetails.companyName.toLowerCase()
+      }
     });
-    await alert.present();
+    await modal.present();
   }
 
   async updateVehicle(): Promise<void> {
@@ -241,14 +159,7 @@ export class ProfilePage implements OnInit {
         {text: 'Save',
           handler: data => {
             this.profileService.updateVehicleDetails(data.vehicle).then(() => {
-              this.toastCtrl.create({
-                message: `Vehicle Details Saved: ${data.vehicle}`,
-                duration: 1500,
-                cssClass: 'toast toast-success',
-                position: 'top'
-              }).then((toast) => {
-                toast.present();
-              });
+              this.showToast(`Vehicle Details Saved: ${data.vehicle}`);
             });
           }}
       ]
@@ -257,22 +168,25 @@ export class ProfilePage implements OnInit {
   }
 
   updateTenureStartDate(): void {
-    const dt: string = moment()
-        .year(this.tenureStart.year.value)
-        .month(this.tenureStart.month.value - 1)
-        .date(this.tenureStart.day.value).format('YYYYMMDD');
-    console.log(`tenure start date: ${dt}`);
+
     if (this.tenureStart) {
-      this.profileService.updateTenureStartDate(dt).then(() => {
-        this.toastCtrl.create({
-          message: `Company Start Date Saved: ${moment(this.tenureStart, 'YYYY-MM-DD').format('DD MMM, YYYY')}`,
-          duration: 1500,
-          cssClass: 'toast toast-success',
-          position: 'top'
-        }).then((toast) => {
-          toast.present();
-        });
+      const dt: string = moment()
+          .year(this.tenureStart.year.value)
+          .month(this.tenureStart.month.value - 1)
+          .date(this.tenureStart.day.value).format('YYYYMMDD');      this.profileService.updateTenureStartDate(dt).then(() => {
+        this.showToast(`Company Start Date Saved: ${moment(this.tenureStart, 'YYYY-MM-DD').format('DD MMM, YYYY')}`);
       });
     }
+  }
+
+  private showToast(message: string): void {
+    this.toastCtrl.create({
+      message: message,
+      duration: 1500,
+      cssClass: 'toast toast-success',
+      position: 'top'
+    }).then((toast) => {
+      toast.present();
+    });
   }
 }

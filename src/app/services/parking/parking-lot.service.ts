@@ -1,13 +1,12 @@
 import {Injectable} from '@angular/core';
 import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
 import {Usage} from '../../model/Usage';
-import {Company} from '../../model/Company';
 import { AngularFireList } from '@angular/fire/database';
 import {Constants} from '../../model/Constants';
 import {Person} from '../../model/Person';
+import {Company} from '../../model/Company';
 import {Calendar} from '../../model/Calendar';
 import * as moment from 'moment';
-import ThenableReference = firebase.database.ThenableReference;
 import {Usages} from '../../model/Usages';
 
 @Injectable({
@@ -15,7 +14,10 @@ import {Usages} from '../../model/Usages';
 })
 export class ParkingLotService {
 
+  private readonly navParams: any;
+
   constructor(private afDb: AngularFireDatabase) {
+    this.navParams = {};
   }
 
   private runUserStatsJob(usages: Usages): any {
@@ -23,40 +25,85 @@ export class ParkingLotService {
     return stats;
   }
 
-  getTodaysUsage(path: string): AngularFireObject<any> {
+  public setNavParams(key: string, value: string): void {
+    this.navParams[key] = value;
+  }
+
+  public getNavParam(key: string): string {
+    return this.navParams[key];
+  }
+  public getTodaysUsage(path: string): AngularFireObject<any> {
     return this.afDb.object(path);
   }
 
-  updateUsage(currUsage: Usage, usage: Usage): Promise<any> {
+  public updateUsage(currUsage: Usage, usage: Usage): Promise<any> {
     return this.afDb.object(usage.getPath()).update(usage.sink()).then(() => {
       this.updateParkingStats(currUsage, usage);
+      if (usage.usage === Constants.USAGE.PARKING) {
+        const lastParkingDate: any = {};
+        lastParkingDate['lastParkingdate'] = usage.usageDate;
+        this.afDb.object(`stats/users/${usage.user}`).update(lastParkingDate);
+      }
     });
   }
 
-  addCompany(company: Company): ThenableReference {
-    return this.afDb.list('company').push(company.name);
+  public addCompany(company: string): Promise<void> {
+    const c: any = {};
+    const key = company.toLowerCase(); // always save the key as lowercase to avoid case sensitivity on the searches
+    c[key] = {};
+    c[key].count = 0;
+    c[key].displayName = company;
+    return this.afDb.object('companies').update(c);
   }
 
-  getCompanies(): AngularFireList<any> {
-    return this.afDb.list('company');
+  public getCompanies(): AngularFireList<any> {
+    return this.afDb.list('companies');
   }
 
-  getUsages(usr: Person): AngularFireList<any> {
+  public searchCompanies(searchStr: string): AngularFireList<any>  {
+    console.log(`Searching: ${searchStr}`);
+    return this.afDb.list('/companies', ref => ref.orderByKey().startAt(searchStr)
+        .endAt(searchStr + Constants.UTILITY.HIGH_UNICODE)
+        .limitToFirst(10));
+  }
+
+  public searchParkingSpots(company: string, searchStr: string): AngularFireList<any>  {
+    console.log(`Searching: ${searchStr} ${searchStr + Constants.UTILITY.HIGH_UNICODE} ${company.toLowerCase()}`);
+    return this.afDb.list(`/companies/${company.toLowerCase()}/spaces`, ref => ref.orderByChild('id').startAt(searchStr)
+        .endAt(searchStr + Constants.UTILITY.HIGH_UNICODE)
+        .limitToFirst(10));
+  }
+
+  public getSpaces(company: string): AngularFireList<any> {
+    return this.afDb.list(`companies/${company}/spaces`);
+  }
+
+  public addSpace(company: string, spaceId: string): Promise<any> {
+    const parkingSpace: any = {};
+    parkingSpace[spaceId] = {};
+    parkingSpace[spaceId].assignedTo = Constants.USAGE.UNASSIGNED;
+    parkingSpace[spaceId].id = spaceId;
+    return this.afDb.object(`companies/${company.toLowerCase()}/spaces`).update(parkingSpace).then(() => {
+      this.incrementStatistic(`companies/${company}/count`);
+    });
+  }
+
+  public getUsages(usr: Person): AngularFireList<any> {
     const path = `usage/${usr.commuteDetails.companyName}/${usr.uid}`;
     return this.afDb.list(path);
   }
 
-  getParkingStats(path: string): AngularFireList<any> {
+  public getParkingStats(path: string): AngularFireList<any> {
     return this.afDb.list(path);
   }
 
-  runStatsJob(): Promise<any> {
+  public runStatsJob(): Promise<any> {
     return this.getUsagesForStats().then((usgs) => {
       const usages: Usages = usgs;
       const companyStats = this.runCompanyStatsJob(usages);
       const userStats = this.runUserStatsJob(usages);
       this.afDb.object('stats').remove().then(() => {
-        this.afDb.object('/').set('stats');
+        this.afDb.object('').set('stats');
       });
     });
   }
@@ -289,4 +336,5 @@ export class ParkingLotService {
     // update the annual parking stats
     this.updateCompanyParkingStats(currUsage, usage, moment(usage.usageDate).format('YYYY'));
   }
+
 }

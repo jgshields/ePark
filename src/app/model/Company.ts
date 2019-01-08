@@ -3,7 +3,6 @@ import {ParkingSpot} from './ParkingSpot';
 
 export class Company implements IDBConnector {
   public name: string;
-  public id: string;
   public parkingSpots: ParkingSpot[];
 
   constructor() {
@@ -11,18 +10,19 @@ export class Company implements IDBConnector {
   }
 
   getPath(): string {
-    return `/company/${this.id}`;
+    return `/companies/${this.name}`;
   }
 
   sink(): any {
     const res: any = {};
-    res.name = this.name;
-    res.id = this.id;
+    res.spaces = this.parkingSpots;
     return res;
   }
 
   source(data: any): void {
-    this.id = data.key;
-    this.name = data.payload.val();
+    this.name = data.name;
+    if (data.spaces) {
+      this.parkingSpots = data.spaces.slice();
+    }
   }
 }

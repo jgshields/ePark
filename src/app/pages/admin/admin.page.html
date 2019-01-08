@@ -19,8 +19,8 @@
         </ion-card>
       </ion-col>
       <ion-col size="4" *ngFor="let company of companies | async">
-        <ion-card tappable>
-          <ion-card-header>{{company.name}}</ion-card-header>
+        <ion-card tappable (click)="manageParkingSpaces(company)">
+          <ion-card-header>{{company.name}} {{company.count}}</ion-card-header>
         </ion-card>
       </ion-col>
     </ion-row>

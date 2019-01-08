@@ -46,4 +46,8 @@ export namespace Constants {
     public static readonly ALL = 'ALL';
     public static readonly WEEKEND = 'WEEKEND';
   }
+
+  export class UTILITY {
+    public static readonly HIGH_UNICODE = '\uf8ff';
+  }
 }
