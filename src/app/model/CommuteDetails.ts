@@ -1,4 +1,5 @@
 import IDBConnector = db.IDBConnector;
+import {Constants} from './Constants';
 
 export class CommuteDetails implements IDBConnector {
   public vehicle: string;
@@ -8,7 +9,7 @@ export class CommuteDetails implements IDBConnector {
   constructor() {
     this.vehicle = '';
     this.companyName = '';
-    this.parkingSpot = '';
+    this.parkingSpot = Constants.USAGE.UNASSIGNED;
   }
 
   getPath(): string {

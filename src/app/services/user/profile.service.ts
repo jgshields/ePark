@@ -65,11 +65,18 @@ export class ProfileService {
   }
 
   updateParkingSpot(parkingSpot: string): Promise<any> {
-    this.user.commuteDetails.parkingSpot = parkingSpot;
-    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails).then(() => {
-      this.afDb.object(`companies/${this.user.commuteDetails.companyName.toLowerCase()}/spaces/${parkingSpot}`)
-          .update({assignedTo: this.user.uid});
-    });
+    if (this.user.commuteDetails.parkingSpot !== parkingSpot) {
+      const prevSpot = this.user.commuteDetails.parkingSpot;
+      this.user.commuteDetails.parkingSpot = parkingSpot;
+      return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails).then(() => {
+        this.afDb.object(`companies/${this.user.commuteDetails.companyName.toLowerCase()}/spaces/${parkingSpot}`)
+            .update({assignedTo: this.user.uid});
+        if (prevSpot !== Constants.USAGE.UNASSIGNED) {
+          this.afDb.object(`companies/${this.user.commuteDetails.companyName.toLowerCase()}/spaces/${prevSpot}`)
+              .update({assignedTo: Constants.USAGE.UNASSIGNED});
+        }
+      });
+    }
   }
 
   updateCompany(companyName: string): Promise<any> {

@@ -34,19 +34,19 @@ export class UserStat {
     }
     this.totalNoResponse = this.daysInMonth - (this.totalFree + this.totalParking);
 
-    if (snap.payload.val().weekends && snap.payload.val().weekends.Free) {
-      this.weekendsFree = snap.payload.val().weekends.Free;
+    if (snap.payload.val().Weekends && snap.payload.val().Weekends.Free) {
+      this.weekendsFree = snap.payload.val().Weekends.Free;
     }
-    if (snap.payload.val().weekends && snap.payload.val().weekends.Parking) {
-      this.weekendsParking = snap.payload.val().weekends.Parking;
+    if (snap.payload.val().Weekends && snap.payload.val().Weekends.Parking) {
+      this.weekendsParking = snap.payload.val().Weekends.Parking;
     }
     this.weekendsNoResponse = this.weekendDays - (this.weekendsFree + this.weekendsParking);
 
-    if (snap.payload.val().weekdays && snap.payload.val().weekdays.Free) {
-      this.weekdaysFree = snap.payload.val().weekdays.Free;
+    if (snap.payload.val().Weekdays && snap.payload.val().Weekdays.Free) {
+      this.weekdaysFree = snap.payload.val().Weekdays.Free;
     }
-    if (snap.payload.val().weekdays && snap.payload.val().weekdays.Parking) {
-      this.weekdaysParking = snap.payload.val().weekdays.Parking;
+    if (snap.payload.val().Weekdays && snap.payload.val().Weekdays.Parking) {
+      this.weekdaysParking = snap.payload.val().Weekdays.Parking;
     }
     this.weekdaysNoResponse = this.weekdays - (this.weekdaysFree + this.weekdaysParking);
   }

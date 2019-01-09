@@ -1,7 +1,8 @@
 {
   "name": "ePark",
   "integrations": {
-    "capacitor": {}
+    "capacitor": {},
+    "cordova": {}
   },
   "type": "angular"
 }
