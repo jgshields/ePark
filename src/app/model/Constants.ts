@@ -3,10 +3,11 @@ export namespace Constants {
     public static readonly FREE = 'Free';
     public static readonly SHARING = 'Sharing';
     public static readonly NO_RESPONSE = 'No Response';
-    public static readonly UNASSIGNED = 'Unassigned';
     public static readonly REQUEST = 'Request';
     public static readonly VISITOR = 'Visitor';
     public static readonly PARKING = 'Parking';
+    public static readonly ASSIGNED = 'Assigned';
+    public static readonly UNASSIGNED = 'Unassigned';
   }
 
   export class FILTER {

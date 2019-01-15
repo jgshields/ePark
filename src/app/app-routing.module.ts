@@ -13,8 +13,8 @@ const routes: Routes = [
   { path: 'admin', loadChildren: './pages/admin/admin.module#AdminPageModule', canActivate: [AuthGuard, AdminGuard]},
   { path: 'calendar', loadChildren: './pages/calendar/calendar.module#CalendarPageModule' , canActivate: [AuthGuard]},
   { path: 'parking-spaces', loadChildren: './pages/parking-spaces/parking-spaces.module#ParkingSpacesPageModule',
-    canActivate: [AuthGuard, AdminGuard] },
-];
+    canActivate: [AuthGuard, AdminGuard] }
+    ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

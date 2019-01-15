@@ -48,7 +48,7 @@ export class AdminPage implements OnInit {
   }
 
   manageParkingSpaces(company: any): void {
-    this.parkingCtrl.setNavParams('company', company.name.toLowerCase());
+    this.parkingCtrl.setNavParams('company', company.name);
     this.routeCtrl.navigate(['parking-spaces']);
   }
 

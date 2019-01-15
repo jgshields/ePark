@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFireDatabase, AngularFireObject } from '@angular/fire/database';
+import { AngularFireDatabase, AngularFireObject, AngularFireList } from '@angular/fire/database';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {Person} from '../../model/Person';
 import * as firebase from 'firebase';
@@ -28,8 +28,21 @@ export class ProfileService {
     return this.afDb.object(this.user.getPath());
   }
 
+  getUser(uid: string): AngularFireObject<any> {
+    return this.afDb.object(`/users/${uid}`);
+  }
+
+  public search(searchStr: string): AngularFireList<any> {
+    console.log(`Searching: ${searchStr}`);
+    return this.afDb.list('/users', ref => ref.orderByChild('searchName').startAt(searchStr)
+        .endAt(searchStr + Constants.UTILITY.HIGH_UNICODE)
+        .limitToFirst(10));
+  }
+
   updateName(firstName: string, lastName: string): Promise<any> {
-    return this.afDb.object(this.user.getPath()).update({firstName, lastName});
+    return this.afDb.object(this.user.getPath()).update({firstName: firstName,
+      lastName: lastName,
+      searchName: `${lastName.toLowerCase()}, ${firstName.toLowerCase()}`});
   }
 
   updateTenureStartDate(date: string): Promise<any> {

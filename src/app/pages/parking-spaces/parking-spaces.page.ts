@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import {ParkingLotService} from '../../services/parking/parking-lot.service';
-import {AlertController, ToastController} from '@ionic/angular';
+import {AlertController, ModalController, ToastController} from '@ionic/angular';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {Constants} from '../../model/Constants';
+import {ParkingSpotListPage} from '../modals/parking-spot-list/parking-spot-list.page';
+import {PersonListPageModule} from '../modals/person-list/person-list.module';
+import {PersonListPage} from '../modals/person-list/person-list.page';
 
 @Component({
   selector: 'app-parking-spaces',
@@ -15,9 +19,10 @@ export class ParkingSpacesPage implements OnInit {
 
   constructor(private parkingCtrl: ParkingLotService,
               private alertCtrl: AlertController,
-              private toastCtrl: ToastController) {
+              private toastCtrl: ToastController,
+              private modalCtrl: ModalController) {
     this.company = this.parkingCtrl.getNavParam('company');
-    this.parkingSpaces = this.parkingCtrl.getSpaces(this.company).snapshotChanges().pipe(
+    this.parkingSpaces = this.parkingCtrl.getSpaces(this.company.toLowerCase()).snapshotChanges().pipe(
         map((changes) => changes.map((c) => ({name: c.key, assignedTo: c.payload.val().assignedTo}))));
   }
 
@@ -48,6 +53,14 @@ export class ParkingSpacesPage implements OnInit {
     await alert.present();
   }
 
+  public getAssignedClass(assignedTo: string): string {
+    if (assignedTo === Constants.USAGE.UNASSIGNED) {
+      return Constants.USAGE.UNASSIGNED.toLowerCase();
+    } else {
+      return Constants.USAGE.ASSIGNED.toLowerCase();
+    }
+  }
+
   private showToast(message: string): void {
     this.toastCtrl.create({
       message: message,
@@ -57,5 +70,16 @@ export class ParkingSpacesPage implements OnInit {
     }).then((toast) => {
       toast.present();
     });
+  }
+
+  async manageAssignment(space): Promise<any> {
+    const modal = await this.modalCtrl.create({
+      component: PersonListPage,
+      componentProps: {
+        uid: space.assignedTo,
+        spotId: space.name
+      }
+    });
+    await modal.present();
   }
 }

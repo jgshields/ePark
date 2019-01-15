@@ -10,6 +10,7 @@ import { AngularFireDatabaseModule } from '@angular/fire/database';
 import {firebaseConfig} from './config/credentials';
 import {CompanyListPageModule} from './pages/modals/company-list/company-list.module';
 import {ParkingSpotListPageModule} from './pages/modals/parking-spot-list/parking-spot-list.module';
+import {PersonListPageModule} from './pages/modals/person-list/person-list.module';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import {ParkingSpotListPageModule} from './pages/modals/parking-spot-list/parkin
     AngularFireAuthModule,
     AngularFireDatabaseModule,
     CompanyListPageModule,
-    ParkingSpotListPageModule
+    ParkingSpotListPageModule,
+    PersonListPageModule
   ],
   providers:
   [
