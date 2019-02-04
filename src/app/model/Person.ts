@@ -13,10 +13,13 @@ export class Person implements IDBConnector {
   public tenureStartDate: Date;
   public commuteDetails: CommuteDetails;
   public userType: string;
+  public hasParkingSpot: boolean;
 
   constructor() {
     this.commuteDetails = new CommuteDetails();
     this.tenureStartDate = moment().toDate();
+    this.fullName = '';
+    this.hasParkingSpot = false;
   }
 
   public getCreatedDateTime(format: string): string {
@@ -69,9 +72,14 @@ export class Person implements IDBConnector {
       this.email = data.email;
       this.firstName = data.firstName;
       this.lastName = data.lastName;
-      this.fullName = `${this.firstName} ${this.lastName}`;
+      if (this.firstName && this.lastName) {
+        this.fullName = `${this.firstName} ${this.lastName}`;
+      }
       this.createdDatetime = moment(data.createdDatetime, 'YYYYMMDD HH:mm:ss').toDate();
       this.commuteDetails = data.commuteDetails;
+      if (this.commuteDetails.parkingSpot !== Constants.USAGE.NO_SPACE) {
+        this.hasParkingSpot = true;
+      }
       if (data.tenureStartDate) {
         this.tenureStartDate = data.tenureStartDate;
       }

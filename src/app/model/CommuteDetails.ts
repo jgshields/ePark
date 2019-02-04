@@ -9,7 +9,7 @@ export class CommuteDetails implements IDBConnector {
   constructor() {
     this.vehicle = '';
     this.companyName = '';
-    this.parkingSpot = Constants.USAGE.UNASSIGNED;
+    this.parkingSpot = Constants.USAGE.NO_SPACE;
   }
 
   getPath(): string {

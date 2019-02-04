@@ -11,6 +11,10 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "config": {
+    "ionic_source_map_type": "source-map",
+    "ionic_webpack": "./config/webpack.config.js"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "~6.1.1",

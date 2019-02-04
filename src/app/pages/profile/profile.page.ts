@@ -4,19 +4,18 @@ import {ProfileService} from '../../services/user/profile.service';
 import {AuthService} from '../../services/user/auth.service';
 import {Person} from '../../model/Person';
 import {ParkingLotService} from '../../services/parking/parking-lot.service';
-import {Company} from '../../model/Company';
-import * as _ from 'lodash';
 import * as moment from 'moment';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
-import {ModalsPlugin} from '@capacitor/core';
 import {CompanyListPage} from '../modals/company-list/company-list.page';
 import {ParkingSpotListPage} from '../modals/parking-spot-list/parking-spot-list.page';
+
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
 })
+
 export class ProfilePage implements OnInit {
   public person: Person;
   public companies: Observable<any[]>;
@@ -34,12 +33,15 @@ export class ProfilePage implements OnInit {
     this.today = moment().format('YYYY-MM-DD');
     this.profileService.getUserProfile().valueChanges().subscribe( (snap) => {
       this.person = new Person();
-      this.person.source(snap);
-      this.tenureStart = moment(this.person.tenureStartDate).format('YYYY-MM-DD');
+      if (snap) {
+        this.person.source(snap);
+        this.tenureStart = moment(this.person.tenureStartDate).format('YYYY-MM-DD');
+      } else {
+        this.person = null;
+      }
     });
     this.companies = this.parkingCtrl.getCompanies().snapshotChanges().pipe(
-        map(changes =>
-            changes.map(c => ({ name: c.payload.key, ...c.payload.val() }))
+        map(changes => changes.map(c => ({ name: c.payload.key, ...c.payload.val() }))
         )
     );
   }

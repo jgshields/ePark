@@ -12,9 +12,9 @@ export class AuthService {
 
   public currUser: Observable<firebase.User | null>;
   public currUserId: string;
+  public isLoggedIn: boolean;
 
-  constructor(private afAuth: AngularFireAuth, private afDb: AngularFireDatabase) {
-  }
+  constructor(private afAuth: AngularFireAuth, private afDb: AngularFireDatabase) { }
 
   loginUser(person: Person, password: string): Promise<any> {
     return this.afAuth.auth.signInWithEmailAndPassword(person.email, password).then((user) => {

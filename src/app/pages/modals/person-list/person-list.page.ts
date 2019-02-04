@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {LoadingController, ModalController, NavParams, ToastController} from '@ionic/angular';
 import {ProfileService} from '../../../services/user/profile.service';
 import {Person} from '../../../model/Person';
+import {Constants} from '../../../model/Constants';
 
 @Component({
   selector: 'app-person-list',
@@ -55,7 +56,37 @@ export class PersonListPage implements OnInit {
     this.modalCtrl.dismiss();
   }
 
-  selectPerson(id: string) {
+  async selectPerson(uid: string): Promise<any> {
+    this.profileCtrl.assignParkingSpot(uid, this.parkingSpot).then(() => {
+      this.toastCtrl.create({
+        message: `Parking Spot: ${this.parkingSpot} assigned to ${uid}`,
+        duration: 1500,
+        cssClass: 'toast toast-success',
+        position: 'top'
+      }).then((toast) => {
+        this.loading.dismiss();
+        toast.present();
+        this.dismiss();
+      });
+    });
+    this.loading = await this.loadingCtrl.create();
+    await this.loading.present();
+  }
 
+  async releaseSpace(): Promise<any> {
+    this.profileCtrl.releaseSpace().then( () => {
+      this.toastCtrl.create({
+        message: `Parking Spot: ${this.parkingSpot} released`,
+        duration: 1500,
+        cssClass: 'toast toast-success',
+        position: 'top'
+      }).then((toast) => {
+        this.loading.dismiss();
+        toast.present();
+        this.dismiss();
+      });
+    });
+    this.loading = await this.loadingCtrl.create();
+    await this.loading.present();
   }
 }

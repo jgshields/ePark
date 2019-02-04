@@ -21,6 +21,7 @@ export class HomePage implements OnInit, OnDestroy {
   public loading: HTMLIonLoadingElement;
   public today: string;
   public subs: any[] = [];
+  public hasParkingSpot: boolean;
 
   constructor(private parkingCtrl: ParkingLotService,
               private profileCtrl: ProfileService,
@@ -45,6 +46,8 @@ export class HomePage implements OnInit, OnDestroy {
       item.unsubscribe();
     });
   }
+
+
 
   async parking(): Promise<void> {
     if (this.todaysUsage && this.todaysUsage.usage === USAGE.PARKING) {
@@ -135,5 +138,8 @@ export class HomePage implements OnInit, OnDestroy {
         this.todaysUsage.source(snap2);
       }
     });
+  }
+
+  requestSpace(): void {
   }
 }

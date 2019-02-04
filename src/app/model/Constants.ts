@@ -8,6 +8,7 @@ export namespace Constants {
     public static readonly PARKING = 'Parking';
     public static readonly ASSIGNED = 'Assigned';
     public static readonly UNASSIGNED = 'Unassigned';
+    public static readonly NO_SPACE = 'No Space';
   }
 
   export class FILTER {

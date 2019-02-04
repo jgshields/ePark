@@ -20,6 +20,9 @@ export class ProfileService {
         this.afDb.object(this.user.getPath()).valueChanges().subscribe((usrSnap) => {
           this.user.source(usrSnap);
         });
+      } else {
+        this.user = null;
+        this.currentUser = null;
       }
     });
   }
@@ -92,6 +95,15 @@ export class ProfileService {
     }
   }
 
+  releaseSpace(): Promise<any> {
+    const prevSpot = this.user.commuteDetails.parkingSpot;
+    this.user.commuteDetails.parkingSpot = Constants.USAGE.NO_SPACE;
+    return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails).then(() => {
+      this.afDb.object(`companies/${this.user.commuteDetails.companyName.toLowerCase()}/spaces/${prevSpot}`)
+          .update({assignedTo: Constants.USAGE.UNASSIGNED});
+    });
+  }
+
   updateCompany(companyName: string): Promise<any> {
     if (this.user.commuteDetails.companyName !== companyName) {
       const spotToClear: any = {};
@@ -109,4 +121,12 @@ export class ProfileService {
     return this.afDb.object(this.user.getPath().concat('/commuteDetails')).update(this.user.commuteDetails);
   }
 
+  assignParkingSpot(uid: string, parkingSpot: string): Promise<any> {
+    const userToUpdate: Person = new Person();
+    this.getUser(uid).query.once('value', (snap) => {
+      userToUpdate.source(snap);
+      userToUpdate.commuteDetails.parkingSpot = parkingSpot;
+    });
+    return this.afDb.object(`${userToUpdate.getPath()}/commuteDetails`).update(userToUpdate.commuteDetails);
+  }
 }
